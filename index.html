@@ -317,6 +317,14 @@
                         <div class="label">새로운 총 단면적</div>
                         <div class="value" id="new-area">-</div>
                     </div>
+                    <div class="result-item">
+                        <div class="label">기준 DC 저항</div>
+                        <div class="value" id="ref-resistance">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">새로운 DC 저항</div>
+                        <div class="value" id="new-resistance">-</div>
+                    </div>
                 </div>
                 
                 <div class="comparison">
@@ -330,15 +338,20 @@
             <div class="info-box">
                 <h4>💡 계산 정보</h4>
                 <ul>
-                    <li><strong>Packing Factor (k):</strong> 0.9069 (Hexagonal Close Packing Assumption)</li>
+                    <li><strong>Packing Factor (k):</strong> 0.9069 (Hexagonal Close Packing)</li>
+                    <li><strong>Copper Conductivity (σ):</strong> 5.8 x 10⁷ S/m (at 20°C)</li>
                     <li><strong>Assumption:</strong> Ideal arrangement (without insulation layers)</li>
-                    <li><strong>Diameter:</strong> D ≈ d × √(N/k)</li>
+                    <li><strong>Diameter Formula:</strong> D ≈ d × √(N/k)</li>
+                    <li><strong>Resistance Formula:</strong> R/L = 1 / (σ × Area)</li>
                 </ul>
             </div>
         </div>
     </div>
 
     <script>
+        // 구리 전도율 상수 정의 (단위: S/m)
+        const COPPER_CONDUCTIVITY = 5.8e7;
+
         function validateInputs(refDiameter, refStrands, newDiameter) {
             const errors = [];
             
@@ -374,6 +387,15 @@
             return singleDiameter * Math.sqrt(strandCount / packingFactor);
         }
 
+        // 미터당 DC 저항 계산 함수 추가
+        function calculateResistancePerMeter(totalArea_mm2, conductivity) {
+            // 단면적을 mm²에서 m²로 변환
+            const totalArea_m2 = totalArea_mm2 * 1e-6;
+            if (totalArea_m2 === 0) return 0;
+            // 저항 공식 R = 1 / (σ * A)
+            return 1 / (conductivity * totalArea_m2);
+        }
+
         function formatNumber(number, decimals = 3) {
             return number.toFixed(decimals);
         }
@@ -394,6 +416,11 @@
             document.getElementById('result-diameter').textContent = formatNumber(results.newLitzDiameter) + ' mm';
             document.getElementById('ref-area').textContent = formatNumber(results.refTotalArea) + ' mm²';
             document.getElementById('new-area').textContent = formatNumber(results.newTotalArea) + ' mm²';
+            
+            // 저항 결과 표시
+            document.getElementById('ref-resistance').textContent = formatNumber(results.refResistance, 5) + ' Ω/m';
+            document.getElementById('new-resistance').textContent = formatNumber(results.newResistance, 5) + ' Ω/m';
+
             document.getElementById('area-ratio').textContent = formatNumber(results.areaRatio, 2) + '배';
             document.getElementById('resistance-ratio').textContent = formatNumber(1/results.areaRatio, 2) + '배 (저항)';
             
@@ -413,12 +440,10 @@
         function calculateLitzWire() {
             hideError();
             
-            // 입력값 가져오기
             const refDiameter = parseFloat(document.getElementById('ref-diameter').value);
             const refStrands = parseInt(document.getElementById('ref-strands').value);
             const newDiameter = parseFloat(document.getElementById('new-diameter').value);
             
-            // 입력값 검증
             const errors = validateInputs(refDiameter, refStrands, newDiameter);
             if (errors.length > 0) {
                 showError(errors.join(' '));
@@ -428,12 +453,14 @@
             // 기준 리츠 와이어 계산
             const refSingleArea = calculateCircularArea(refDiameter);
             const refTotalArea = refSingleArea * refStrands;
+            const refResistance = calculateResistancePerMeter(refTotalArea, COPPER_CONDUCTIVITY); // 기준 저항 계산
             
             // 새로운 리츠 와이어 계산
             const newSingleArea = calculateCircularArea(newDiameter);
             const newStrands = Math.ceil(refTotalArea / newSingleArea);
             const newTotalArea = newSingleArea * newStrands;
             const newLitzDiameter = calculatePackedDiameter(newDiameter, newStrands);
+            const newResistance = calculateResistancePerMeter(newTotalArea, COPPER_CONDUCTIVITY); // 새로운 저항 계산
             
             // 성능 비교
             const areaRatio = newTotalArea / refTotalArea;
@@ -443,13 +470,14 @@
                 newLitzDiameter,
                 refTotalArea,
                 newTotalArea,
-                areaRatio
+                areaRatio,
+                refResistance, // 결과 객체에 추가
+                newResistance  // 결과 객체에 추가
             };
             
             displayResults(results);
         }
 
-        // 엔터키로 계산 실행
         document.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 calculateLitzWire();

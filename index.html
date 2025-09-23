@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리츠 와이어 계산기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h2::before {
+            content: "⚡";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .input-group .unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            display: none;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results h3 {
+            color: #2c5aa0;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-item .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .result-item .value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c5aa0;
+        }
+
+        .comparison {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #f44336;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .info-box h4 {
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            list-style-position: inside;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>리츠 와이어 계산기</h1>
+            <p>동일하거나 낮은 DC 저항을 갖는 리츠 와이어 설계 도구</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>기준 리츠 와이어 사양</h2>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="ref-diameter">단선 직경</label>
+                        <input type="number" id="ref-diameter" placeholder="0.1" step="0.001" min="0.001">
+                        <span class="unit">mm</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="ref-strands">가닥 수</label>
+                        <input type="number" id="ref-strands" placeholder="100" step="1" min="1">
+                        <span class="unit">가닥</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>새로운 리츠 와이어 사양</h2>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="new-diameter">단선 직경</label>
+                        <input type="number" id="new-diameter" placeholder="0.08" step="0.001" min="0.001">
+                        <span class="unit">mm</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="calculate-btn" onclick="calculateLitzWire()">계산하기</button>
+
+            <div id="error" class="error"></div>
+
+            <div id="results" class="results">
+                <h3>📊 계산 결과</h3>
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="label">최소 필요 가닥 수</div>
+                        <div class="value" id="result-strands">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">예상 전체 직경</div>
+                        <div class="value" id="result-diameter">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">기준 총 단면적</div>
+                        <div class="value" id="ref-area">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">새로운 총 단면적</div>
+                        <div class="value" id="new-area">-</div>
+                    </div>
+                </div>
+                
+                <div class="comparison">
+                    <h4>🔍 성능 비교</h4>
+                    <p><strong>단면적 비율:</strong> <span id="area-ratio">-</span></p>
+                    <p><strong>상대 저항:</strong> <span id="resistance-ratio">-</span></p>
+                    <p><strong>구조 효율성:</strong> <span id="efficiency">-</span></p>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>💡 계산 정보</h4>
+                <ul>
+                    <li><strong>Packing Factor (k):</strong> 0.9069 (Hexagonal Close Packing Assumption)</li>
+                    <li><strong>Assumption:</strong> Ideal arrangement (without insulation layers)</li>
+                    <li><strong>Diameter:</strong> D ≈ d × √(N/k)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateInputs(refDiameter, refStrands, newDiameter) {
+            const errors = [];
+            
+            if (isNaN(refDiameter) || refDiameter <= 0) {
+                errors.push("기준 단선 직경은 0보다 큰 숫자여야 합니다.");
+            }
+            
+            if (isNaN(refStrands) || refStrands <= 0 || !Number.isInteger(refStrands)) {
+                errors.push("기준 가닥 수는 1 이상의 정수여야 합니다.");
+            }
+            
+            if (isNaN(newDiameter) || newDiameter <= 0) {
+                errors.push("새로운 단선 직경은 0보다 큰 숫자여야 합니다.");
+            }
+            
+            if (refDiameter > 2 || newDiameter > 2) {
+                errors.push("단선 직경이 2mm를 초과하면 일반적인 리츠 와이어 범위를 벗어날 수 있습니다.");
+            }
+            
+            if (refStrands > 10000) {
+                errors.push("가닥 수가 너무 큽니다. 실제 제조 가능성을 확인해주세요.");
+            }
+            
+            return errors;
+        }
+
+        function calculateCircularArea(diameter) {
+            const radius = diameter / 2;
+            return Math.PI * radius * radius;
+        }
+
+        function calculatePackedDiameter(singleDiameter, strandCount, packingFactor = 0.9069) {
+            return singleDiameter * Math.sqrt(strandCount / packingFactor);
+        }
+
+        function formatNumber(number, decimals = 3) {
+            return number.toFixed(decimals);
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('error');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            document.getElementById('results').classList.remove('show');
+        }
+
+        function hideError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        function displayResults(results) {
+            document.getElementById('result-strands').textContent = results.newStrands + ' 가닥';
+            document.getElementById('result-diameter').textContent = formatNumber(results.newLitzDiameter) + ' mm';
+            document.getElementById('ref-area').textContent = formatNumber(results.refTotalArea) + ' mm²';
+            document.getElementById('new-area').textContent = formatNumber(results.newTotalArea) + ' mm²';
+            document.getElementById('area-ratio').textContent = formatNumber(results.areaRatio, 2) + '배';
+            document.getElementById('resistance-ratio').textContent = formatNumber(1/results.areaRatio, 2) + '배 (저항)';
+            
+            let efficiency;
+            if (results.areaRatio > 1.2) {
+                efficiency = "우수 (과도한 도체량)";
+            } else if (results.areaRatio >= 1.0) {
+                efficiency = "적절 (설계 목표 달성)";
+            } else {
+                efficiency = "부족 (저항 증가)";
+            }
+            document.getElementById('efficiency').textContent = efficiency;
+            
+            document.getElementById('results').classList.add('show');
+        }
+
+        function calculateLitzWire() {
+            hideError();
+            
+            // 입력값 가져오기
+            const refDiameter = parseFloat(document.getElementById('ref-diameter').value);
+            const refStrands = parseInt(document.getElementById('ref-strands').value);
+            const newDiameter = parseFloat(document.getElementById('new-diameter').value);
+            
+            // 입력값 검증
+            const errors = validateInputs(refDiameter, refStrands, newDiameter);
+            if (errors.length > 0) {
+                showError(errors.join(' '));
+                return;
+            }
+            
+            // 기준 리츠 와이어 계산
+            const refSingleArea = calculateCircularArea(refDiameter);
+            const refTotalArea = refSingleArea * refStrands;
+            
+            // 새로운 리츠 와이어 계산
+            const newSingleArea = calculateCircularArea(newDiameter);
+            const newStrands = Math.ceil(refTotalArea / newSingleArea);
+            const newTotalArea = newSingleArea * newStrands;
+            const newLitzDiameter = calculatePackedDiameter(newDiameter, newStrands);
+            
+            // 성능 비교
+            const areaRatio = newTotalArea / refTotalArea;
+            
+            const results = {
+                newStrands,
+                newLitzDiameter,
+                refTotalArea,
+                newTotalArea,
+                areaRatio
+            };
+            
+            displayResults(results);
+        }
+
+        // 엔터키로 계산 실행
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                calculateLitzWire();
+            }
+        });
+    </script>
+</body>
+</html>

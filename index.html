@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>리츠 와이어 계산기</title>
+    <title>Litz Wire Calculator</title>
     <style>
         * {
             margin: 0;
@@ -262,32 +262,32 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>리츠 와이어 계산기</h1>
-            <p>동일하거나 낮은 DC 저항을 갖는 리츠 와이어 설계 도구</p>
+            <h1>Litz Wire Calculator</h1>
+            <p>Alternative litz wire calculation</p>
         </div>
 
         <div class="content">
             <div class="section">
-                <h2>기준 리츠 와이어 사양</h2>
+                <h2>Reference Litz Wire</h2>
                 <div class="input-row">
                     <div class="input-group">
-                        <label for="ref-diameter">단선 직경</label>
+                        <label for="ref-diameter">Diameter of a single wire</label>
                         <input type="number" id="ref-diameter" placeholder="0.1" step="0.001" min="0.001">
                         <span class="unit">mm</span>
                     </div>
                     <div class="input-group">
-                        <label for="ref-strands">가닥 수</label>
+                        <label for="ref-strands">No. of strands</label>
                         <input type="number" id="ref-strands" placeholder="100" step="1" min="1">
-                        <span class="unit">가닥</span>
+                        <span class="unit">Strands</span>
                     </div>
                 </div>
             </div>
 
             <div class="section">
-                <h2>새로운 리츠 와이어 사양</h2>
+                <h2>New Litz Wire</h2>
                 <div class="input-row">
                     <div class="input-group">
-                        <label for="new-diameter">단선 직경</label>
+                        <label for="new-diameter">Diameter of a single wire</label>
                         <input type="number" id="new-diameter" placeholder="0.08" step="0.001" min="0.001">
                         <span class="unit">mm</span>
                     </div>
@@ -299,44 +299,44 @@
             <div id="error" class="error"></div>
 
             <div id="results" class="results">
-                <h3>📊 계산 결과</h3>
+                <h3>📊 Calculation Results</h3>
                 <div class="result-grid">
                     <div class="result-item">
-                        <div class="label">최소 필요 가닥 수</div>
+                        <div class="label">Minimum No. of Strands</div>
                         <div class="value" id="result-strands">-</div>
                     </div>
                     <div class="result-item">
-                        <div class="label">예상 전체 직경</div>
+                        <div class="label">Estimated Diameter</div>
                         <div class="value" id="result-diameter">-</div>
                     </div>
                     <div class="result-item">
-                        <div class="label">기준 총 단면적</div>
+                        <div class="label">Reference Cross Section Area</div>
                         <div class="value" id="ref-area">-</div>
                     </div>
                     <div class="result-item">
-                        <div class="label">새로운 총 단면적</div>
+                        <div class="label">New Cross Section Area</div>
                         <div class="value" id="new-area">-</div>
                     </div>
                     <div class="result-item">
-                        <div class="label">기준 DC 저항</div>
+                        <div class="label">Reference DCR</div>
                         <div class="value" id="ref-resistance">-</div>
                     </div>
                     <div class="result-item">
-                        <div class="label">새로운 DC 저항</div>
+                        <div class="label">New DCR</div>
                         <div class="value" id="new-resistance">-</div>
                     </div>
                 </div>
                 
                 <div class="comparison">
-                    <h4>🔍 성능 비교</h4>
-                    <p><strong>단면적 비율:</strong> <span id="area-ratio">-</span></p>
-                    <p><strong>상대 저항:</strong> <span id="resistance-ratio">-</span></p>
-                    <p><strong>구조 효율성:</strong> <span id="efficiency">-</span></p>
+                    <h4>🔍 Performance Comparison</h4>
+                    <p><strong>Area Ratio:</strong> <span id="area-ratio">-</span></p>
+                    <p><strong>Resistance Ratio:</strong> <span id="resistance-ratio">-</span></p>
+                    <p><strong>Structure Efficiency:</strong> <span id="efficiency">-</span></p>
                 </div>
             </div>
 
             <div class="info-box">
-                <h4>💡 계산 정보</h4>
+                <h4>💡 Calculation Equations</h4>
                 <ul>
                     <li><strong>Packing Factor (k):</strong> 0.9069 (Hexagonal Close Packing)</li>
                     <li><strong>Copper Conductivity (σ):</strong> 5.8 x 10⁷ S/m (at 20°C)</li>

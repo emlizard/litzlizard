@@ -1,134 +1,143 @@
-// 구리 전도율 상수 정의 (단위: S/m)
-        const COPPER_CONDUCTIVITY = 5.8e7;
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM 요소 캐싱
+    const elements = {
+        refDiameter: document.getElementById('ref-diameter'),
+        refStrands: document.getElementById('ref-strands'),
+        newDiameter: document.getElementById('new-diameter'),
+        calculateBtn: document.getElementById('calculate-btn'),
+        error: document.getElementById('error'),
+        results: document.getElementById('results'),
+        resultStrands: document.getElementById('result-strands'),
+        resultDiameter: document.getElementById('result-diameter'),
+        refArea: document.getElementById('ref-area'),
+        newArea: document.getElementById('new-area'),
+        refResistance: document.getElementById('ref-resistance'),
+        newResistance: document.getElementById('new-resistance'),
+        themeToggle: document.getElementById('theme-toggle'),
+    };
 
-        function validateInputs(refDiameter, refStrands, newDiameter) {
-            const errors = [];
-            
-            if (isNaN(refDiameter) || refDiameter <= 0) {
-                errors.push("기준 단선 직경은 0보다 큰 숫자여야 합니다.");
-            }
-            
-            if (isNaN(refStrands) || refStrands <= 0 || !Number.isInteger(refStrands)) {
-                errors.push("기준 가닥 수는 1 이상의 정수여야 합니다.");
-            }
-            
-            if (isNaN(newDiameter) || newDiameter <= 0) {
-                errors.push("새로운 단선 직경은 0보다 큰 숫자여야 합니다.");
-            }
-            
-            if (refDiameter > 2 || newDiameter > 2) {
-                errors.push("단선 직경이 2mm를 초과하면 일반적인 리츠 와이어 범위를 벗어날 수 있습니다.");
-            }
-            
-            if (refStrands > 10000) {
-                errors.push("가닥 수가 너무 큽니다. 실제 제조 가능성을 확인해주세요.");
-            }
-            
-            return errors;
+    // --- 상수 정의 ---
+    const COPPER_CONDUCTIVITY = 5.8e7; // 구리 전도율 (S/m)
+    const PACKING_FACTOR = 0.9069; // 충진율
+
+    // --- 테마 변경 기능 ---
+    const sunIcon = `☀️`;
+    const moonIcon = `🌙`;
+    
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        elements.themeToggle.innerHTML = theme === 'dark' ? sunIcon : moonIcon;
+        localStorage.setItem('theme', theme);
+    }
+
+    elements.themeToggle.addEventListener('click', () => {
+        const currentTheme = document.body.getAttribute('data-theme');
+        setTheme(currentTheme === 'light' ? 'dark' : 'light');
+    });
+    
+    // 페이지 로드 시 저장된 테마 적용
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+
+
+    // --- 계산 기능 ---
+    function validateInputs(refDiameter, refStrands, newDiameter) {
+        if (!refDiameter || !refStrands || !newDiameter) {
+            return "모든 입력값을 채워주세요.";
+        }
+        if (refDiameter <= 0 || refStrands <= 0 || newDiameter <= 0) {
+            return "입력값은 0보다 커야 합니다.";
+        }
+        return null;
+    }
+
+    function calculateArea(diameter) {
+        const radius = diameter / 2;
+        return Math.PI * radius * radius;
+    }
+    
+    function calculatePackedDiameter(singleDiameter, strandCount) {
+        return singleDiameter * Math.sqrt(strandCount / PACKING_FACTOR);
+    }
+
+    function calculateResistancePerMeter(totalArea_mm2) {
+        if (totalArea_mm2 === 0) return 0;
+        const totalArea_m2 = totalArea_mm2 * 1e-6;
+        return 1 / (COPPER_CONDUCTIVITY * totalArea_m2);
+    }
+
+    function formatNumber(num, decimals = 4) {
+        return parseFloat(num.toFixed(decimals));
+    }
+
+    function showError(message) {
+        elements.error.textContent = message;
+        elements.error.style.display = 'block';
+        elements.results.style.display = 'none';
+    }
+
+    function hideError() {
+        elements.error.style.display = 'none';
+    }
+    
+    function updateResultValue(element, value) {
+        element.textContent = value;
+        element.classList.add('updated');
+        setTimeout(() => element.classList.remove('updated'), 500);
+    }
+
+    function displayResults(data) {
+        updateResultValue(elements.resultStrands, `${data.newStrands} 가닥`);
+        updateResultValue(elements.resultDiameter, formatNumber(data.newLitzDiameter));
+        updateResultValue(elements.refArea, formatNumber(data.refTotalArea));
+        updateResultValue(elements.newArea, formatNumber(data.newTotalArea));
+        updateResultValue(elements.refResistance, formatNumber(data.refResistance, 6));
+        updateResultValue(elements.newResistance, formatNumber(data.newResistance, 6));
+        
+        elements.results.style.display = 'block';
+    }
+
+    function calculateLitzWire() {
+        hideError();
+        
+        const refDiameter = parseFloat(elements.refDiameter.value);
+        const refStrands = parseInt(elements.refStrands.value);
+        const newDiameter = parseFloat(elements.newDiameter.value);
+
+        const errorMessage = validateInputs(refDiameter, refStrands, newDiameter);
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
         }
 
-        function calculateCircularArea(diameter) {
-            const radius = diameter / 2;
-            return Math.PI * radius * radius;
-        }
+        const refSingleArea = calculateArea(refDiameter);
+        const refTotalArea = refSingleArea * refStrands;
+        const refResistance = calculateResistancePerMeter(refTotalArea);
 
-        function calculatePackedDiameter(singleDiameter, strandCount, packingFactor = 0.9069) {
-            return singleDiameter * Math.sqrt(strandCount / packingFactor);
-        }
+        const newSingleArea = calculateArea(newDiameter);
+        const newStrands = Math.ceil(refTotalArea / newSingleArea);
+        const newTotalArea = newSingleArea * newStrands;
+        const newLitzDiameter = calculatePackedDiameter(newDiameter, newStrands);
+        const newResistance = calculateResistancePerMeter(newTotalArea);
 
-        // 미터당 DC 저항 계산 함수 추가
-        function calculateResistancePerMeter(totalArea_mm2, conductivity) {
-            // 단면적을 mm²에서 m²로 변환
-            const totalArea_m2 = totalArea_mm2 * 1e-6;
-            if (totalArea_m2 === 0) return 0;
-            // 저항 공식 R = 1 / (σ * A)
-            return 1 / (conductivity * totalArea_m2);
-        }
+        displayResults({
+            newStrands,
+            newLitzDiameter,
+            refTotalArea,
+            newTotalArea,
+            refResistance,
+            newResistance
+        });
+    }
 
-        function formatNumber(number, decimals = 3) {
-            return number.toFixed(decimals);
-        }
+    // --- 이벤트 리스너 ---
+    elements.calculateBtn.addEventListener('click', calculateLitzWire);
 
-        function showError(message) {
-            const errorElement = document.getElementById('error');
-            errorElement.textContent = message;
-            errorElement.classList.add('show');
-            document.getElementById('results').classList.remove('show');
-        }
-
-        function hideError() {
-            document.getElementById('error').classList.remove('show');
-        }
-
-        function displayResults(results) {
-            document.getElementById('result-strands').textContent = results.newStrands + ' 가닥';
-            document.getElementById('result-diameter').textContent = formatNumber(results.newLitzDiameter) + ' mm';
-            document.getElementById('ref-area').textContent = formatNumber(results.refTotalArea) + ' mm²';
-            document.getElementById('new-area').textContent = formatNumber(results.newTotalArea) + ' mm²';
-            
-            // 저항 결과 표시
-            document.getElementById('ref-resistance').textContent = formatNumber(results.refResistance, 5) + ' Ω/m';
-            document.getElementById('new-resistance').textContent = formatNumber(results.newResistance, 5) + ' Ω/m';
-
-            document.getElementById('area-ratio').textContent = formatNumber(results.areaRatio, 2) + '배';
-            document.getElementById('resistance-ratio').textContent = formatNumber(1/results.areaRatio, 2) + '배 (저항)';
-            
-            let efficiency;
-            if (results.areaRatio > 1.2) {
-                efficiency = "우수 (과도한 도체량)";
-            } else if (results.areaRatio >= 1.0) {
-                efficiency = "적절 (설계 목표 달성)";
-            } else {
-                efficiency = "부족 (저항 증가)";
-            }
-            document.getElementById('efficiency').textContent = efficiency;
-            
-            document.getElementById('results').classList.add('show');
-        }
-
-        function calculateLitzWire() {
-            hideError();
-            
-            const refDiameter = parseFloat(document.getElementById('ref-diameter').value);
-            const refStrands = parseInt(document.getElementById('ref-strands').value);
-            const newDiameter = parseFloat(document.getElementById('new-diameter').value);
-            
-            const errors = validateInputs(refDiameter, refStrands, newDiameter);
-            if (errors.length > 0) {
-                showError(errors.join(' '));
-                return;
-            }
-            
-            // 기준 리츠 와이어 계산
-            const refSingleArea = calculateCircularArea(refDiameter);
-            const refTotalArea = refSingleArea * refStrands;
-            const refResistance = calculateResistancePerMeter(refTotalArea, COPPER_CONDUCTIVITY); // 기준 저항 계산
-            
-            // 새로운 리츠 와이어 계산
-            const newSingleArea = calculateCircularArea(newDiameter);
-            const newStrands = Math.ceil(refTotalArea / newSingleArea);
-            const newTotalArea = newSingleArea * newStrands;
-            const newLitzDiameter = calculatePackedDiameter(newDiameter, newStrands);
-            const newResistance = calculateResistancePerMeter(newTotalArea, COPPER_CONDUCTIVITY); // 새로운 저항 계산
-            
-            // 성능 비교
-            const areaRatio = newTotalArea / refTotalArea;
-            
-            const results = {
-                newStrands,
-                newLitzDiameter,
-                refTotalArea,
-                newTotalArea,
-                areaRatio,
-                refResistance, // 결과 객체에 추가
-                newResistance  // 결과 객체에 추가
-            };
-            
-            displayResults(results);
-        }
-
-        document.addEventListener('keypress', function(event) {
+    document.querySelectorAll('.input-field').forEach(input => {
+        input.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
                 calculateLitzWire();
             }
         });
+    });
+});

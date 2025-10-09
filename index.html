@@ -10,75 +10,79 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body data-theme="light">
-    
     <header class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <h1 class="page-title">Litz Wire Calculator</h1>
-            </div>
-            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-                </button>
-        </div>
-    </header>
+    <div class="header-content">
+      <div class="logo-section">
+        <a href="https://emlizard.github.io/main-page/" class="back-btn">
+          <i class="fas fa-arrow-left"></i>
+          ← Back to Calculators
+        </a>
+        <div class="page-title">Litz Wire Calculator</div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+  </header>
 
     <main class="container">
         <div class="hero">
             <h1>Alternative Litz Wire Calculation</h1>
-            <p>기준 리츠 와이어의 단면적을 기반으로 새로운 규격의 최소 가닥 수를 계산합니다.</p>
+            <p>This calculates the minimum number of strands for a new specification based on the cross-sectional area of a reference Litz wire.</p>
         </div>
 
         <div class="grid grid-2">
             <div class="card animate-in">
                 <h2 class="card-title">
                     <span class="card-icon">⚡</span>
-                    입력값
+                    Input Value
                 </h2>
                 <div class="input-group">
-                    <label for="ref-diameter" class="input-label">기준 단선 직경</label>
+                    <label for="ref-diameter" class="input-label">Reference Wire Diameter</label>
                     <input type="number" id="ref-diameter" class="input-field" placeholder="0.1" step="0.001" min="0.001">
                 </div>
                 <div class="input-group">
-                    <label for="ref-strands" class="input-label">기준 가닥 수</label>
+                    <label for="ref-strands" class="input-label">Reference No. of Strands</label>
                     <input type="number" id="ref-strands" class="input-field" placeholder="100" step="1" min="1">
                 </div>
                 <div class="input-group">
-                    <label for="new-diameter" class="input-label">새로운 단선 직경</label>
+                    <label for="new-diameter" class="input-label">New Wire Diameter</label>
                     <input type="number" id="new-diameter" class="input-field" placeholder="0.08" step="0.001" min="0.001">
                 </div>
                  <button id="calculate-btn" class="btn btn-full">
-                    계산하기
+                    Calculate
                 </button>
             </div>
 
             <div class="card animate-in">
                 <h2 class="card-title">
                     <span class="card-icon">📊</span>
-                    계산 결과
+                    Calculation Results
                 </h2>
                 <div id="results" class="result-display" style="display: none;">
                     <div class="result-grid">
                         <div class="result-item">
-                            <div class="result-label">최소 필요 가닥 수</div>
+                            <div class="result-label">Minimum No. of Strands</div>
                             <div class="result-value" id="result-strands">-</div>
                         </div>
                         <div class="result-item">
-                            <div class="result-label">예상 리츠 외경 (mm)</div>
+                            <div class="result-label">Litz Diameter (mm)</div>
                             <div class="result-value" id="result-diameter">-</div>
                         </div>
                         <div class="result-item">
-                            <div class="result-label">기준 총 단면적 (mm²)</div>
+                            <div class="result-label">Reference Cross Section Area (mm²)</div>
                             <div class="result-value" id="ref-area">-</div>
                         </div>
                         <div class="result-item">
-                            <div class="result-label">새로운 총 단면적 (mm²)</div>
+                            <div class="result-label">New Area (mm²)</div>
                             <div class="result-value" id="new-area">-</div>
                         </div>
                          <div class="result-item">
-                            <div class="result-label">기준 DCR (Ω/m)</div>
+                            <div class="result-label">Reference DCR (Ω/m)</div>
                             <div class="result-value" id="ref-resistance">-</div>
                         </div>
                         <div class="result-item">
-                            <div class="result-label">새로운 DCR (Ω/m)</div>
+                            <div class="result-label">New DCR (Ω/m)</div>
                             <div class="result-value" id="new-resistance">-</div>
                         </div>
                     </div>
@@ -88,12 +92,12 @@
         </div>
         
         <div class="formula-section card animate-in">
-            <h3>💡 계산 정보</h3>
+            <h3>💡 Calculation Formula</h3>
             <div class="formula-content">
                 <ul>
-                    <li><strong>Packing Factor (k):</strong> 0.9069 (육방정계 조밀 구조 기준)</li>
-                    <li><strong>구리 전도율 (σ):</strong> 5.8 x 10⁷ S/m (20°C 기준)</li>
-                    <li><strong>가정:</strong> 절연막을 제외한 이상적인 도체 배열을 가정합니다.</li>
+                    <li><strong>Packing Factor (k):</strong> 0.9069 (Hexagonal Close-Packed (HCP) structure)</li>
+                    <li><strong>Copper Conductivity (σ):</strong> 5.8 x 10⁷ S/m (20°C)</li>
+                    <li><strong>Assumption:</strong> This assumes an ideal conductor arrangement, excluding the insulating layer.</li>
                 </ul>
             </div>
         </div>

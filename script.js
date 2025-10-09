@@ -43,10 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 계산 기능 ---
     function validateInputs(refDiameter, refStrands, newDiameter) {
         if (!refDiameter || !refStrands || !newDiameter) {
-            return "모든 입력값을 채워주세요.";
+            return "Please fill in all fields.";
         }
         if (refDiameter <= 0 || refStrands <= 0 || newDiameter <= 0) {
-            return "입력값은 0보다 커야 합니다.";
+            return "The input value must be greater than 0.";
         }
         return null;
     }
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayResults(data) {
-        updateResultValue(elements.resultStrands, `${data.newStrands} 가닥`);
+        updateResultValue(elements.resultStrands, `${data.newStrands} Strands`);
         updateResultValue(elements.resultDiameter, formatNumber(data.newLitzDiameter));
         updateResultValue(elements.refArea, formatNumber(data.refTotalArea));
         updateResultValue(elements.newArea, formatNumber(data.newTotalArea));
